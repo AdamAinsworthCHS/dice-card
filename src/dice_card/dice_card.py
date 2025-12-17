@@ -7,6 +7,16 @@ from Card import Card
 from Player import Player
 from Hands import Hands
 from Deck import Deck
+import sys
+from PySide6.QtWidgets import (
+    QApplication,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 straight_flush = Hands(100, 5, "Straight Flush!")
 four_of_a_kind = Hands(80, 4, "Four of a Kind.")
@@ -167,8 +177,31 @@ def main():
 	show_cards()
 	return
 
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Dice Card App")
+        self.setContentsMargins(12, 12, 12, 12)
+        self.resize(320, 240)
+
+        layout = QVBoxLayout()
+        title_label = QLabel("Dice Card App: a cooooool little game ;D.")
+
+        # add widgets & layouts to main layout
+        layout.addWidget(title_label)
+        widget = QWidget()
+        widget.setLayout(layout)
+
+        # Set the central widget of the Window.
+        self.setCentralWidget(widget)
 
 if __name__ == "__main__":
+	app = QApplication(sys.argv)
+	window = MainWindow()
+	window.show()
+	app.exec()
 	print(user)
 	print(deck)
 	main()
+

@@ -6,8 +6,9 @@ authors = [
     {name = "AdamAinsworthCHS",email = "147109448+AdamAinsworthCHS@users.noreply.github.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12,<3.14"
 dependencies = [
+    "pyside6 (>=6.10.0,<7.0.0)"
 ]
 
 [tool.poetry]
