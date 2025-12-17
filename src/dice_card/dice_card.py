@@ -9,13 +9,13 @@ from Hands import Hands
 from Deck import Deck
 import sys
 from PySide6.QtWidgets import (
-    QApplication,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
+	QApplication,
+	QLabel,
+	QLineEdit,
+	QMainWindow,
+	QPushButton,
+	QVBoxLayout,
+	QWidget,
 )
 
 straight_flush = Hands(100, 5, "Straight Flush!")
@@ -178,23 +178,60 @@ def main():
 	return
 
 class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+	def __init__(self):
+		super().__init__()
 
-        self.setWindowTitle("Dice Card App")
-        self.setContentsMargins(12, 12, 12, 12)
-        self.resize(320, 240)
+		self.setWindowTitle("Dice Card App")
+		self.setContentsMargins(12, 12, 12, 12)
+		self.resize(320, 240)
 
-        layout = QVBoxLayout()
-        title_label = QLabel("Dice Card App: a cooooool little game ;D.")
+		layout = QVBoxLayout()
 
-        # add widgets & layouts to main layout
-        layout.addWidget(title_label)
-        widget = QWidget()
-        widget.setLayout(layout)
+		# title
+		title_label = QLabel("Dice Card App: a cooooool little game ;D.")
 
-        # Set the central widget of the Window.
-        self.setCentralWidget(widget)
+		# card buttons
+		slot_1 = QPushButton("Empty")
+		slot_2 = QPushButton("Empty")
+		slot_3 = QPushButton("Empty")
+		slot_4 = QPushButton("Empty")
+		slot_5 = QPushButton("Empty")
+		slot_6 = QPushButton("Empty")
+		slot_7 = QPushButton("Empty")
+		slot_8 = QPushButton("Empty")
+		slot_1.clicked.connect(lambda: self.play_card(1))
+		slot_2.clicked.connect(lambda: self.play_card(2))
+		slot_3.clicked.connect(lambda: self.play_card(3))
+		slot_4.clicked.connect(lambda: self.play_card(4))
+		slot_5.clicked.connect(lambda: self.play_card(5))
+		slot_6.clicked.connect(lambda: self.play_card(6))
+		slot_7.clicked.connect(lambda: self.play_card(7))
+		slot_8.clicked.connect(lambda: self.play_card(8))
+
+
+
+
+		# add widgets & layouts to main layout
+		layout.addWidget(title_label)
+		layout.addWidget(slot_1)
+		layout.addWidget(slot_2)
+		layout.addWidget(slot_3)
+		layout.addWidget(slot_4)
+		layout.addWidget(slot_5)
+		layout.addWidget(slot_6)
+		layout.addWidget(slot_7)
+		layout.addWidget(slot_8)
+		widget = QWidget()
+		widget.setLayout(layout)
+
+		# Set the central widget of the Window.
+		self.setCentralWidget(widget)
+	
+	def play_card(self, card_number):
+		"""play the current button's card"""
+		print(str(card_number))
+		return
+
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
