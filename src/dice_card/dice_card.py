@@ -56,58 +56,7 @@ def show_cards():
 	print("Cards to be Played:")
 	for i in range (len(playing)):
 		print(str(i + 1) + ": " + str(playing[i]))
-	game_process()
 	return
-
-
-def game_process():
-	"""
-	This method asks the player what command they wish to input
-	typing roll rolls 1 die and draws that many cards
-	typing a number plays that corresponding card
-	typing play plays the current selected cards
-	typing q quits the game.
-	"""
-	hand_length = len(hand)
-	cards_play_length = len(playing)
-	play_cards = input("Draw Cards ('roll') Play Card ('#') Play Hand ('play') Quit ('q'): ")
-	try:
-		play_cards = int(play_cards)
-	except ValueError:
-		if play_cards == "roll":
-			if Player.dice >= 1:
-				Player.dice -= 1
-				for i in range(random.randrange(1, 7)):
-					new_card = Deck.draw_card()
-					hand.append(new_card)
-				show_cards()
-				return
-			else:
-				print("No dice remaining")
-				game_process()
-				return
-		elif play_cards == "play":
-			play_hand()
-			return
-		elif play_cards == "q":
-			return
-		else:
-			print("Unrecognized command")
-			show_cards()
-			return
-	if cards_play_length < 5:
-			if play_cards > hand_length or play_cards <= 0:
-				print("Card not found")
-				game_process()
-				return
-			else:
-				process(play_cards)
-				return
-	else:
-		print("Max hand size is 5")
-		game_process()
-		return
-
 
 def play_hand():
 	"""
@@ -166,17 +115,6 @@ def process(play_cards):
 	return
 
 
-def main():
-	"""
-	This method gives the player 8 cards
-	and begins the game.
-	"""
-	for i in range(8):
-		new_card = Deck.draw_card()
-		hand.append(new_card)
-	show_cards()
-	return
-
 class MainWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
@@ -191,36 +129,54 @@ class MainWindow(QMainWindow):
 		title_label = QLabel("Dice Card App: a cooooool little game ;D.")
 
 		# card buttons
-		slot_1 = QPushButton("Empty")
-		slot_2 = QPushButton("Empty")
-		slot_3 = QPushButton("Empty")
-		slot_4 = QPushButton("Empty")
-		slot_5 = QPushButton("Empty")
-		slot_6 = QPushButton("Empty")
-		slot_7 = QPushButton("Empty")
-		slot_8 = QPushButton("Empty")
-		slot_1.clicked.connect(lambda: self.play_card(1))
-		slot_2.clicked.connect(lambda: self.play_card(2))
-		slot_3.clicked.connect(lambda: self.play_card(3))
-		slot_4.clicked.connect(lambda: self.play_card(4))
-		slot_5.clicked.connect(lambda: self.play_card(5))
-		slot_6.clicked.connect(lambda: self.play_card(6))
-		slot_7.clicked.connect(lambda: self.play_card(7))
-		slot_8.clicked.connect(lambda: self.play_card(8))
+		self.slot_1 = QPushButton("Empty")
+		self.slot_2 = QPushButton("Empty")
+		self.slot_3 = QPushButton("Empty")
+		self.slot_4 = QPushButton("Empty")
+		self.slot_5 = QPushButton("Empty")
+		self.slot_6 = QPushButton("Empty")
+		self.slot_7 = QPushButton("Empty")
+		self.slot_8 = QPushButton("Empty")
+		self.slot_1.clicked.connect(lambda: self.play_card(1))
+		self.slot_2.clicked.connect(lambda: self.play_card(2))
+		self.slot_3.clicked.connect(lambda: self.play_card(3))
+		self.slot_4.clicked.connect(lambda: self.play_card(4))
+		self.slot_5.clicked.connect(lambda: self.play_card(5))
+		self.slot_6.clicked.connect(lambda: self.play_card(6))
+		self.slot_7.clicked.connect(lambda: self.play_card(7))
+		self.slot_8.clicked.connect(lambda: self.play_card(8))\
+		
+		#dictionary thing
+		self.slots_index =   {
+			0: self.slot_1,
+			1: self.slot_2,
+			2: self.slot_3,
+			3: self.slot_4,
+			4: self.slot_5,
+			5: self.slot_6,
+			6: self.slot_7,
+			7: self.slot_8
+		}
 
+		# play hand button
+		play_hand_button = QPushButton("Play Hand")
+		begin_game_button = QPushButton("Begin")
+		begin_game_button.clicked.connect(lambda: self.update_cards())
 
 
 
 		# add widgets & layouts to main layout
 		layout.addWidget(title_label)
-		layout.addWidget(slot_1)
-		layout.addWidget(slot_2)
-		layout.addWidget(slot_3)
-		layout.addWidget(slot_4)
-		layout.addWidget(slot_5)
-		layout.addWidget(slot_6)
-		layout.addWidget(slot_7)
-		layout.addWidget(slot_8)
+		layout.addWidget(self.slot_1)
+		layout.addWidget(self.slot_2)
+		layout.addWidget(self.slot_3)
+		layout.addWidget(self.slot_4)
+		layout.addWidget(self.slot_5)
+		layout.addWidget(self.slot_6)
+		layout.addWidget(self.slot_7)
+		layout.addWidget(self.slot_8)
+		layout.addWidget(play_hand_button)
+		layout.addWidget(begin_game_button)
 		widget = QWidget()
 		widget.setLayout(layout)
 
@@ -229,16 +185,48 @@ class MainWindow(QMainWindow):
 	
 	def play_card(self, card_number):
 		"""play the current button's card"""
-		print(str(card_number))
+		playing.append(hand[int(card_number) - 1])
+		hand.remove(hand[int(card_number) - 1])
+		self.update_cards()
 		return
+	
+	def update_cards(self):
+		print("UPDATING THE CARDS!")
+		print(len(hand))
+		for i in range(len(hand)):
+			self.slots_index[i].setText(hand[i].name)
+
+	def roll_die(self):
+		if Player.dice >= 1:
+			Player.dice -= 1
+			for i in range(random.randrange(1, 7)):
+				new_card = Deck.draw_card()
+				hand.append(new_card)
+			self.update_cards()
+			return
+		else:
+			print("No dice remaining")
+			return
 
 
-if __name__ == "__main__":
+def main():
+	"""
+	This method gives the player 8 cards
+	and begins the game.
+	"""
 	app = QApplication(sys.argv)
 	window = MainWindow()
 	window.show()
+	for i in range(8):
+		new_card = Deck.draw_card()
+		hand.append(new_card)
 	app.exec()
+	return
+
+
+if __name__ == "__main__":
+	main()
 	print(user)
 	print(deck)
-	main()
+	
 
