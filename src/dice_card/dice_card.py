@@ -44,89 +44,74 @@ class MainWindow(QMainWindow):
 		self.setContentsMargins(12, 12, 12, 12)
 		self.resize(320, 240)
 
-		layout = QVBoxLayout()
+		self.main_layout = QVBoxLayout()
 
 		# title
 		title_label = QLabel("Dice Card App: a cooooool little game ;D.")
 
 		# card buttons
-		self.slot_1 = QPushButton("Empty")
-		self.slot_2 = QPushButton("Empty")
-		self.slot_3 = QPushButton("Empty")
-		self.slot_4 = QPushButton("Empty")
-		self.slot_5 = QPushButton("Empty")
-		self.slot_6 = QPushButton("Empty")
-		self.slot_7 = QPushButton("Empty")
-		self.slot_8 = QPushButton("Empty")
-		self.slot_1.clicked.connect(lambda: self.play_card(1))
-		self.slot_2.clicked.connect(lambda: self.play_card(2))
-		self.slot_3.clicked.connect(lambda: self.play_card(3))
-		self.slot_4.clicked.connect(lambda: self.play_card(4))
-		self.slot_5.clicked.connect(lambda: self.play_card(5))
-		self.slot_6.clicked.connect(lambda: self.play_card(6))
-		self.slot_7.clicked.connect(lambda: self.play_card(7))
-		self.slot_8.clicked.connect(lambda: self.play_card(8))\
 		
 		#dictionary thing
-		self.slots_index =   {
-			0: self.slot_1,
-			1: self.slot_2,
-			2: self.slot_3,
-			3: self.slot_4,
-			4: self.slot_5,
-			5: self.slot_6,
-			6: self.slot_7,
-			7: self.slot_8
-		}
+		self.slots_index = []
 
 		# play hand button
 		begin_game_button = QPushButton("Begin")
-		begin_game_button.clicked.connect(lambda: self.update_cards())
+		begin_game_button.clicked.connect(lambda: self.begin_game())
 		play_hand_button = QPushButton("Play Hand")
 		play_hand_button.clicked.connect(lambda: self.play_hand())
 		roll_die_button = QPushButton("Roll Die")
 		roll_die_button.clicked.connect(lambda: self.roll_die())
 
 		# add widgets & layouts to main layout
-		layout.addWidget(title_label)
-		layout.addWidget(self.slot_1)
-		layout.addWidget(self.slot_2)
-		layout.addWidget(self.slot_3)
-		layout.addWidget(self.slot_4)
-		layout.addWidget(self.slot_5)
-		layout.addWidget(self.slot_6)
-		layout.addWidget(self.slot_7)
-		layout.addWidget(self.slot_8)
-		layout.addWidget(begin_game_button)
-		layout.addWidget(play_hand_button)
-		layout.addWidget(roll_die_button)
+		self.main_layout.addWidget(title_label)
+		self.main_layout.addWidget(begin_game_button)
+		self.main_layout.addWidget(play_hand_button)
+		self.main_layout.addWidget(roll_die_button)
 		widget = QWidget()
-		widget.setLayout(layout)
+		widget.setLayout(self.main_layout)
 
 		# Set the central widget of the Window.
 		self.setCentralWidget(widget)
 	
-	def play_card(self, card_number):
+	def play_card(self):
 		"""
 		This method moves the card the player selected
 		from the list of current cards into the 
 		list of cards currently selected to be played.
 		"""
+		card_number = int(self.sender().objectName)
+		print(card_number)
 		playing.append(hand[int(card_number) - 1])
 		hand.remove(hand[int(card_number) - 1])
 		self.update_cards()
 		return
 	
+	def begin_game(self):
+		"""
+		This method updates each button to correctly represent
+		the card in the hand it corresponds to.
+		"""
+		for i in range(len(hand)):
+			card_slot = QPushButton()
+			card_slot.setObjectName(str(i))
+			card_slot.clicked.connect(lambda: self.play_card())
+			self.slots_index.append(card_slot)
+			self.main_layout.addWidget(card_slot)
+		for i in range(len(self.slots_index)):
+			print(self.slots_index[i])
+		self.update_cards()
+
+
 	def update_cards(self):
 		"""
 		This method updates each button to correctly represent
 		the card in the hand it corresponds to.
 		"""
-		for i in range(8):
+		for i in range(len(hand)):
 			try:
 				self.slots_index[i].setText(hand[i].name)
 			except IndexError:
-				self.slots_index[i].setText("Empty")
+				self.main_layout.removeWidget(self.slots_index[i])
 
 	def roll_die(self):
 		if Player.dice >= 1:
