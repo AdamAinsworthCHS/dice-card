@@ -32,88 +32,9 @@ deck = Deck(52)
 
 user = Player("PlayerName")
 
-
 #Main variables and lists
 hand = []
 playing = []
-
-
-
-def show_cards():
-	"""
-	This method first shows the player's current score and dice
-	then it shows every card the player has
-	then it shows what cards the player has currently selected to play
-	after giving this info, it calls the game_process method.
-	"""
-	print("")
-	print("Score: " + str(Player.score))
-	print("Dice: " + str(Player.dice))
-	print("Cards in Hand:")
-	for i in range (len(hand)):
-		print(str(i + 1) + ": " + str(hand[i]))
-	print("")
-	print("Cards to be Played:")
-	for i in range (len(playing)):
-		print(str(i + 1) + ": " + str(playing[i]))
-	return
-
-def play_hand():
-	"""
-	This method takes the current selected cards and
-	calculates them to see what kind of poker hand
-	they are. Then it gives the player the requisite
-	points and dice for that poker hand.
-	Finally, it gives them points for each
-	card played.
-	"""
-	print("Calculating hand...")
-	if Hands.calculate_flush(playing) == True:
-		if Hands.calculate_straight(playing) == True:
-			straight_flush.process_hand()
-			print(straight_flush)
-		else:
-			flush.process_hand()
-			print(flush)
-	elif Hands.calculate_kinds(playing) == 4:
-		four_of_a_kind.process_hand()
-		print(four_of_a_kind)
-	elif Hands.calculate_full_house(playing) == True:
-		full_house.process_hand()
-		print(full_house)
-	elif Hands.calculate_straight(playing) == True:
-		straight.process_hand()
-		print(straight)
-	elif Hands.calculate_kinds(playing) == 3:
-		three_of_a_kind.process_hand()
-		print(three_of_a_kind)
-	elif Hands.calculate_pairs(playing) == 2:
-		two_pair.process_hand()
-		print(two_pair)
-	elif Hands.calculate_pairs(playing) == 1:
-		pair.process_hand()
-		print(pair)
-	else:
-		high_card.process_hand()
-		print(high_card)
-	for i in range (len(playing)):
-		Player.score = Player.score + playing[i].point_value
-	playing.clear()
-	show_cards()
-	return
-
-
-def process(play_cards):
-	"""
-	This method moves the card the player selected
-	from the list of current cards into the 
-	list of cards currently selected to be played.
-	"""
-	playing.append(hand[int(play_cards) - 1])
-	hand.remove(hand[int(play_cards) - 1])
-	show_cards()
-	return
-
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -159,11 +80,12 @@ class MainWindow(QMainWindow):
 		}
 
 		# play hand button
-		play_hand_button = QPushButton("Play Hand")
 		begin_game_button = QPushButton("Begin")
 		begin_game_button.clicked.connect(lambda: self.update_cards())
-
-
+		play_hand_button = QPushButton("Play Hand")
+		play_hand_button.clicked.connect(lambda: self.play_hand())
+		roll_die_button = QPushButton("Roll Die")
+		roll_die_button.clicked.connect(lambda: self.roll_die())
 
 		# add widgets & layouts to main layout
 		layout.addWidget(title_label)
@@ -175,8 +97,9 @@ class MainWindow(QMainWindow):
 		layout.addWidget(self.slot_6)
 		layout.addWidget(self.slot_7)
 		layout.addWidget(self.slot_8)
-		layout.addWidget(play_hand_button)
 		layout.addWidget(begin_game_button)
+		layout.addWidget(play_hand_button)
+		layout.addWidget(roll_die_button)
 		widget = QWidget()
 		widget.setLayout(layout)
 
@@ -184,17 +107,26 @@ class MainWindow(QMainWindow):
 		self.setCentralWidget(widget)
 	
 	def play_card(self, card_number):
-		"""play the current button's card"""
+		"""
+		This method moves the card the player selected
+		from the list of current cards into the 
+		list of cards currently selected to be played.
+		"""
 		playing.append(hand[int(card_number) - 1])
 		hand.remove(hand[int(card_number) - 1])
 		self.update_cards()
 		return
 	
 	def update_cards(self):
-		print("UPDATING THE CARDS!")
-		print(len(hand))
-		for i in range(len(hand)):
-			self.slots_index[i].setText(hand[i].name)
+		"""
+		This method updates each button to correctly represent
+		the card in the hand it corresponds to.
+		"""
+		for i in range(8):
+			try:
+				self.slots_index[i].setText(hand[i].name)
+			except IndexError:
+				self.slots_index[i].setText("Empty")
 
 	def roll_die(self):
 		if Player.dice >= 1:
@@ -207,6 +139,49 @@ class MainWindow(QMainWindow):
 		else:
 			print("No dice remaining")
 			return
+	
+	def play_hand(self):
+		"""
+		This method takes the current selected cards and
+		calculates them to see what kind of poker hand
+		they are. Then it gives the player the requisite
+		points and dice for that poker hand.
+		Finally, it gives them points for each
+		card played.
+		"""
+		print("Calculating hand...")
+		if Hands.calculate_flush(playing) == True:
+			if Hands.calculate_straight(playing) == True:
+				straight_flush.process_hand()
+				print(straight_flush)
+			else:
+				flush.process_hand()
+				print(flush)
+		elif Hands.calculate_kinds(playing) == 4:
+			four_of_a_kind.process_hand()
+			print(four_of_a_kind)
+		elif Hands.calculate_full_house(playing) == True:
+			full_house.process_hand()
+			print(full_house)
+		elif Hands.calculate_straight(playing) == True:
+			straight.process_hand()
+			print(straight)
+		elif Hands.calculate_kinds(playing) == 3:
+			three_of_a_kind.process_hand()
+			print(three_of_a_kind)
+		elif Hands.calculate_pairs(playing) == 2:
+			two_pair.process_hand()
+			print(two_pair)
+		elif Hands.calculate_pairs(playing) == 1:
+			pair.process_hand()
+			print(pair)
+		else:
+			high_card.process_hand()
+			print(high_card)
+		for i in range (len(playing)):
+			Player.score = Player.score + playing[i].point_value
+		playing.clear()
+		return
 
 
 def main():
