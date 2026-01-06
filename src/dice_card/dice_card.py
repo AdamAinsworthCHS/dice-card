@@ -96,7 +96,11 @@ class MainWindow(QMainWindow):
 			self.main_layout.addWidget(card_slot)
 		for i in range(len(self.slots_index)):
 			print(self.slots_index[i])
-		self.update_cards()
+		for i in range(len(hand)):
+			try:
+				self.slots_index[i].setText(hand[i].name)
+			except IndexError:
+				self.main_layout.removeWidget(self.slots_index[i])
 
 
 	def update_cards(self):
@@ -104,11 +108,10 @@ class MainWindow(QMainWindow):
 		This method updates each button to correctly represent
 		the card in the hand it corresponds to.
 		"""
-		for i in range(len(hand)):
-			try:
-				self.slots_index[i].setText(hand[i].name)
-			except IndexError:
-				self.main_layout.removeWidget(self.slots_index[i])
+		for i in range(len(self.slots_index)):
+			self.slots_index[i].deleteLater()
+		self.slots_index.clear()
+		self.begin_game()
 
 	def roll_die(self):
 		if Player.dice >= 1:
