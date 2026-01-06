@@ -48,6 +48,8 @@ class MainWindow(QMainWindow):
 
 		# title
 		title_label = QLabel("Dice Card App: a cooooool little game ;D.")
+		self.score_label = QLabel("Score: 0")
+		self.dice_label = QLabel("Dice: 2")
 
 		# card buttons
 		
@@ -64,6 +66,8 @@ class MainWindow(QMainWindow):
 
 		# add widgets & layouts to main layout
 		self.main_layout.addWidget(title_label)
+		self.main_layout.addWidget(self.score_label)
+		self.main_layout.addWidget(self.dice_label)
 		self.main_layout.addWidget(begin_game_button)
 		self.main_layout.addWidget(play_hand_button)
 		self.main_layout.addWidget(roll_die_button)
@@ -94,8 +98,6 @@ class MainWindow(QMainWindow):
 			card_slot.clicked.connect(lambda checked=False, index=i: self.play_card(index))
 			self.slots_index.append(card_slot)
 			self.main_layout.addWidget(card_slot)
-		for i in range(len(self.slots_index)):
-			print(self.slots_index[i])
 		for i in range(len(hand)):
 			try:
 				self.slots_index[i].setText(hand[i].name)
@@ -120,9 +122,11 @@ class MainWindow(QMainWindow):
 				new_card = Deck.draw_card()
 				hand.append(new_card)
 			self.update_cards()
+			self.dice_label.setText("Dice: " + str(Player.dice))
 			return
 		else:
 			print("No dice remaining")
+			self.dice_label.setText("Dice: " + str(Player.dice))
 			return
 	
 	def play_hand(self):
@@ -166,6 +170,8 @@ class MainWindow(QMainWindow):
 		for i in range (len(playing)):
 			Player.score = Player.score + playing[i].point_value
 		playing.clear()
+		self.score_label.setText("Score: " + str(Player.score))
+		self.dice_label.setText("Dice: " + str(Player.dice))
 		return
 
 
