@@ -73,16 +73,14 @@ class MainWindow(QMainWindow):
 		# Set the central widget of the Window.
 		self.setCentralWidget(widget)
 	
-	def play_card(self):
+	def play_card(self, slot):
 		"""
 		This method moves the card the player selected
 		from the list of current cards into the 
 		list of cards currently selected to be played.
 		"""
-		card_number = int(self.sender().objectName)
-		print(card_number)
-		playing.append(hand[int(card_number) - 1])
-		hand.remove(hand[int(card_number) - 1])
+		playing.append(hand[slot])
+		hand.remove(hand[slot])
 		self.update_cards()
 		return
 	
@@ -93,8 +91,7 @@ class MainWindow(QMainWindow):
 		"""
 		for i in range(len(hand)):
 			card_slot = QPushButton()
-			card_slot.setObjectName(str(i))
-			card_slot.clicked.connect(lambda: self.play_card())
+			card_slot.clicked.connect(lambda checked=False, index=i: self.play_card(index))
 			self.slots_index.append(card_slot)
 			self.main_layout.addWidget(card_slot)
 		for i in range(len(self.slots_index)):
