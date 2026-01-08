@@ -35,6 +35,12 @@ user = Player("PlayerName")
 #Main variables and lists
 hand = []
 playing = []
+instructions = """Instructions:
+- Click 'Roll Dice' to get more cards
+- Click on 'Play Hand' to play your hand
+- Click on cards to play them
+- Click on 'Begin' to start the game
+Have fun and try to get a high score!"""
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -46,29 +52,36 @@ class MainWindow(QMainWindow):
 
 		self.main_layout = QVBoxLayout()
 
-		# title
-		title_label = QLabel("Dice Card App: a cooooool little game ;D.")
+		# labels
+		instructions_label = QLabel(instructions)
 		self.score_label = QLabel("Score: 0")
 		self.dice_label = QLabel("Dice: 2")
+		self.played_cards_label = QLabel("Cards To Be Played:")
+		self.event_label = QLabel("No event")
 
 		# card buttons
 		
 		#dictionary thing
 		self.slots_index = []
 
+		#game variables
+		self.game_begun = False
+
 		# play hand button
-		begin_game_button = QPushButton("Begin")
-		begin_game_button.clicked.connect(lambda: self.begin_game())
+		self.begin_game_button = QPushButton("Begin")
+		self.begin_game_button.clicked.connect(lambda: self.begin_game())
 		play_hand_button = QPushButton("Play Hand")
 		play_hand_button.clicked.connect(lambda: self.play_hand())
 		roll_die_button = QPushButton("Roll Die")
 		roll_die_button.clicked.connect(lambda: self.roll_die())
 
 		# add widgets & layouts to main layout
-		self.main_layout.addWidget(title_label)
+		self.main_layout.addWidget(instructions_label)
 		self.main_layout.addWidget(self.score_label)
 		self.main_layout.addWidget(self.dice_label)
-		self.main_layout.addWidget(begin_game_button)
+		self.main_layout.addWidget(self.event_label)
+		self.main_layout.addWidget(self.played_cards_label)
+		self.main_layout.addWidget(self.begin_game_button)
 		self.main_layout.addWidget(play_hand_button)
 		self.main_layout.addWidget(roll_die_button)
 		widget = QWidget()
@@ -83,10 +96,17 @@ class MainWindow(QMainWindow):
 		from the list of current cards into the 
 		list of cards currently selected to be played.
 		"""
-		playing.append(hand[slot])
-		hand.remove(hand[slot])
-		self.update_cards()
-		return
+		if len(playing) >= 5:
+			self.event_label.setText("You can only play 5 or fewer cards at once.")
+			return
+		else:
+			playing.append(hand[slot])
+			hand.remove(hand[slot])
+			self.update_cards()
+			self.played_cards_label.setText("Cards To Be Played:")
+			for i in range (len(playing)):
+				self.played_cards_label.setText(self.played_cards_label.text() + " " + playing[i].name + ",")
+			return
 	
 	def begin_game(self):
 		"""
@@ -103,6 +123,8 @@ class MainWindow(QMainWindow):
 				self.slots_index[i].setText(hand[i].name)
 			except IndexError:
 				self.main_layout.removeWidget(self.slots_index[i])
+		self.begin_game_button.deleteLater()
+		self.game_begun = True
 
 
 	def update_cards(self):
@@ -113,20 +135,32 @@ class MainWindow(QMainWindow):
 		for i in range(len(self.slots_index)):
 			self.slots_index[i].deleteLater()
 		self.slots_index.clear()
-		self.begin_game()
+		for i in range(len(hand)):
+			card_slot = QPushButton()
+			card_slot.clicked.connect(lambda checked=False, index=i: self.play_card(index))
+			self.slots_index.append(card_slot)
+			self.main_layout.addWidget(card_slot)
+		for i in range(len(hand)):
+			try:
+				self.slots_index[i].setText(hand[i].name)
+			except IndexError:
+				self.main_layout.removeWidget(self.slots_index[i])
 
 	def roll_die(self):
-		if Player.dice >= 1:
-			Player.dice -= 1
-			for i in range(random.randrange(1, 7)):
-				new_card = Deck.draw_card()
-				hand.append(new_card)
-			self.update_cards()
-			self.dice_label.setText("Dice: " + str(Player.dice))
-			return
+		if self.game_begun == True:
+			if Player.dice >= 1:
+				Player.dice -= 1
+				for i in range(random.randrange(1, 7)):
+					new_card = Deck.draw_card()
+					hand.append(new_card)
+				self.update_cards()
+				self.dice_label.setText("Dice: " + str(Player.dice))
+				return
+			else:
+				self.event_label.setText("No dice remaining")
+				self.dice_label.setText("Dice: " + str(Player.dice))
+				return
 		else:
-			print("No dice remaining")
-			self.dice_label.setText("Dice: " + str(Player.dice))
 			return
 	
 	def play_hand(self):
@@ -138,41 +172,47 @@ class MainWindow(QMainWindow):
 		Finally, it gives them points for each
 		card played.
 		"""
-		print("Calculating hand...")
-		if Hands.calculate_flush(playing) == True:
-			if Hands.calculate_straight(playing) == True:
-				straight_flush.process_hand()
-				print(straight_flush)
+		if self.game_begun == True:
+			print("Calculating hand...")
+			if Hands.calculate_flush(playing) == True:
+				if Hands.calculate_straight(playing) == True:
+					straight_flush.process_hand()
+					self.event_label.setText(straight_flush.to_string())
+				else:
+					flush.process_hand()
+					self.event_label.setText(flush.to_string())
+			elif Hands.calculate_kinds(playing) == 4:
+				four_of_a_kind.process_hand()
+				self.event_label.setText(four_of_a_kind.to_string())
+			elif Hands.calculate_full_house(playing) == True:
+				full_house.process_hand()
+				self.event_label.setText(full_house.to_string())
+			elif Hands.calculate_straight(playing) == True:
+				straight.process_hand()
+				self.event_label.setText(straight.to_string())
+			elif Hands.calculate_kinds(playing) == 3:
+				three_of_a_kind.process_hand()
+				self.event_label.setText(three_of_a_kind.to_string())
+			elif Hands.calculate_pairs(playing) == 2:
+				two_pair.process_hand()
+				self.event_label.setText(two_pair.to_string())
+			elif Hands.calculate_pairs(playing) == 1:
+				pair.process_hand()
+				self.event_label.setText(pair.to_string())
 			else:
-				flush.process_hand()
-				print(flush)
-		elif Hands.calculate_kinds(playing) == 4:
-			four_of_a_kind.process_hand()
-			print(four_of_a_kind)
-		elif Hands.calculate_full_house(playing) == True:
-			full_house.process_hand()
-			print(full_house)
-		elif Hands.calculate_straight(playing) == True:
-			straight.process_hand()
-			print(straight)
-		elif Hands.calculate_kinds(playing) == 3:
-			three_of_a_kind.process_hand()
-			print(three_of_a_kind)
-		elif Hands.calculate_pairs(playing) == 2:
-			two_pair.process_hand()
-			print(two_pair)
-		elif Hands.calculate_pairs(playing) == 1:
-			pair.process_hand()
-			print(pair)
+				high_card.process_hand()
+				self.event_label.setText(high_card.to_string())
+			for i in range (len(playing)):
+				Player.score = Player.score + playing[i].point_value
+			playing.clear()
+			self.score_label.setText("Score: " + str(Player.score))
+			self.dice_label.setText("Dice: " + str(Player.dice))
+			self.played_cards_label.setText("Cards To Be Played:")
+			for i in range (len(playing)):
+				self.played_cards_label.setText(self.played_cards_label.text() + " " + playing[i].name + ",")
+			return
 		else:
-			high_card.process_hand()
-			print(high_card)
-		for i in range (len(playing)):
-			Player.score = Player.score + playing[i].point_value
-		playing.clear()
-		self.score_label.setText("Score: " + str(Player.score))
-		self.dice_label.setText("Dice: " + str(Player.dice))
-		return
+			return
 
 
 def main():

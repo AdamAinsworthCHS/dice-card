@@ -167,7 +167,7 @@ class Hands:
 			return 2
 	
 	
-	def __str__(self):
+	def to_string(self):
 		"""
 		This method returns info about the hand.
 		"""
