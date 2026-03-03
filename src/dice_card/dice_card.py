@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 	QPushButton,
 	QVBoxLayout,
 	QWidget,
+	QListWidget
 )
 
 straight_flush = Hands(100, 5, "Straight Flush!")
@@ -35,10 +36,11 @@ user = Player("PlayerName")
 #Main variables and lists
 hand = []
 playing = []
+hand_string = []
 instructions = """Instructions:
-- Click 'Roll Dice' to get more cards
+- Click on 'Roll Dice' to get more cards
 - Click on 'Play Hand' to play your hand
-- Click on cards to play them
+- Click on cards in the list to play them
 - Click on 'Begin' to start the game
 Have fun and try to get a high score!"""
 
@@ -53,16 +55,15 @@ class MainWindow(QMainWindow):
 		self.main_layout = QVBoxLayout()
 
 		# labels
-		instructions_label = QLabel(instructions)
+		self.instructions_label = QLabel(instructions)
 		self.score_label = QLabel("Score: 0")
 		self.dice_label = QLabel("Dice: 2")
 		self.played_cards_label = QLabel("Cards To Be Played:")
 		self.event_label = QLabel("No event")
 
-		# card buttons
-		
-		#dictionary thing
-		self.slots_index = []
+		# cards list
+		self.cards_list = QListWidget()
+		self.cards_list.itemClicked.connect(self.play_card)
 
 		#game variables
 		self.game_begun = False
@@ -76,7 +77,7 @@ class MainWindow(QMainWindow):
 		roll_die_button.clicked.connect(lambda: self.roll_die())
 
 		# add widgets & layouts to main layout
-		self.main_layout.addWidget(instructions_label)
+		self.main_layout.addWidget(self.instructions_label)
 		self.main_layout.addWidget(self.score_label)
 		self.main_layout.addWidget(self.dice_label)
 		self.main_layout.addWidget(self.event_label)
@@ -84,6 +85,7 @@ class MainWindow(QMainWindow):
 		self.main_layout.addWidget(self.begin_game_button)
 		self.main_layout.addWidget(play_hand_button)
 		self.main_layout.addWidget(roll_die_button)
+		self.main_layout.addWidget(self.cards_list)
 		widget = QWidget()
 		widget.setLayout(self.main_layout)
 
@@ -96,12 +98,15 @@ class MainWindow(QMainWindow):
 		from the list of current cards into the 
 		list of cards currently selected to be played.
 		"""
+		print(hand_string)
 		if len(playing) >= 5:
 			self.event_label.setText("You can only play 5 or fewer cards at once.")
 			return
 		else:
-			playing.append(hand[slot])
-			hand.remove(hand[slot])
+			item_pos = hand_string.index(self.cards_list.selectedItems()[0].text())
+			playing.append(hand[item_pos])
+			hand.remove(hand[item_pos])
+			hand_string.remove(hand_string[item_pos])
 			self.update_cards()
 			self.played_cards_label.setText("Cards To Be Played:")
 			for i in range (len(playing)):
@@ -110,41 +115,23 @@ class MainWindow(QMainWindow):
 	
 	def begin_game(self):
 		"""
-		This method updates each button to correctly represent
-		the card in the hand it corresponds to.
+		This method updates the list widget so that
+		it displays the cards the player has
 		"""
-		for i in range(len(hand)):
-			card_slot = QPushButton()
-			card_slot.clicked.connect(lambda checked=False, index=i: self.play_card(index))
-			self.slots_index.append(card_slot)
-			self.main_layout.addWidget(card_slot)
-		for i in range(len(hand)):
-			try:
-				self.slots_index[i].setText(hand[i].name)
-			except IndexError:
-				self.main_layout.removeWidget(self.slots_index[i])
+		for i in range (len(hand)):
+			self.cards_list.addItem(str(hand[i]))
 		self.begin_game_button.deleteLater()
+		self.instructions_label.setText("")
 		self.game_begun = True
-
 
 	def update_cards(self):
 		"""
-		This method updates each button to correctly represent
-		the card in the hand it corresponds to.
+		This method updates the list widget so that
+		it displays the cards the player has
 		"""
-		for i in range(len(self.slots_index)):
-			self.slots_index[i].deleteLater()
-		self.slots_index.clear()
-		for i in range(len(hand)):
-			card_slot = QPushButton()
-			card_slot.clicked.connect(lambda checked=False, index=i: self.play_card(index))
-			self.slots_index.append(card_slot)
-			self.main_layout.addWidget(card_slot)
-		for i in range(len(hand)):
-			try:
-				self.slots_index[i].setText(hand[i].name)
-			except IndexError:
-				self.main_layout.removeWidget(self.slots_index[i])
+		self.cards_list.clear()
+		for i in range (len(hand)):
+			self.cards_list.addItem(str(hand[i]))
 
 	def roll_die(self):
 		if self.game_begun == True:
@@ -153,6 +140,7 @@ class MainWindow(QMainWindow):
 				for i in range(random.randrange(1, 7)):
 					new_card = Deck.draw_card()
 					hand.append(new_card)
+					hand_string.append(str(new_card))
 				self.update_cards()
 				self.dice_label.setText("Dice: " + str(Player.dice))
 				return
@@ -226,6 +214,7 @@ def main():
 	for i in range(8):
 		new_card = Deck.draw_card()
 		hand.append(new_card)
+		hand_string.append(str(new_card))
 	app.exec()
 	return
 
