@@ -16,8 +16,9 @@ from PySide6.QtWidgets import (
 	QPushButton,
 	QVBoxLayout,
 	QWidget,
-	QListWidget
+	QListWidget,
 )
+from PySide6.QtGui import QIcon
 
 straight_flush = Hands(100, 5, "Straight Flush!")
 four_of_a_kind = Hands(80, 4, "Four of a Kind.")
@@ -98,7 +99,6 @@ class MainWindow(QMainWindow):
 		from the list of current cards into the 
 		list of cards currently selected to be played.
 		"""
-		print(hand_string)
 		if len(playing) >= 5:
 			self.event_label.setText("You can only play 5 or fewer cards at once.")
 			return
@@ -120,6 +120,7 @@ class MainWindow(QMainWindow):
 		"""
 		for i in range (len(hand)):
 			self.cards_list.addItem(str(hand[i]))
+			self.cards_list.item(i).setIcon(self.card_icon(self.cards_list.item(i).text()))
 		self.begin_game_button.deleteLater()
 		self.instructions_label.setText("")
 		self.game_begun = True
@@ -132,6 +133,10 @@ class MainWindow(QMainWindow):
 		self.cards_list.clear()
 		for i in range (len(hand)):
 			self.cards_list.addItem(str(hand[i]))
+			self.cards_list.item(i).setIcon(self.card_icon(self.cards_list.item(i).text()))
+
+	def card_icon(self, card_name):
+		return QIcon("resources/images/" + card_name + ".png")
 
 	def roll_die(self):
 		if self.game_begun == True:
